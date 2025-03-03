@@ -38,7 +38,7 @@ defmodule Structo.MixProject do
 
   def deps do
     [
-      {:ex_doc, "~> 0.31", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.31", only: :dev, runtime: false}
     ]
   end
 
@@ -48,6 +48,17 @@ defmodule Structo.MixProject do
       api_reference: false,
       authors: ["Robijntje"],
       formatters: ["html"],
+      before_closing_head_tag: fn _ ->
+        docs_extra_html()
+      end
     ]
+  end
+
+  defp docs_extra_html do
+    """
+    <style>
+      #summary { display: none }
+    </style
+    """
   end
 end
