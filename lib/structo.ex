@@ -19,15 +19,29 @@ defmodule Structo do
   """
 
   @doc false
-  def parse(expression) do
+  def parse!(expression) do
     expression
     |> String.split(~r/\s*,\s*/, trim: true)
-    |> Enum.map(&parse_segments/1)
+    |> parse_segments()
+  end
+
+  @doc false
+  def parse_segments([":" <> module | segments]) do
+    {Module.concat([module]), parse_fields(segments)}
+  end
+
+  @doc false
+  def parse_segments(s), do: parse_fields(s)
+
+  @doc false
+  def parse_fields(segments) when is_list(segments) do
+    segments
+    |> Enum.map(&parse_segment/1)
     |> Enum.uniq_by(fn {key, _} -> key end)
   end
 
   @doc false
-  def parse_segments(segment) do
+  def parse_segment(segment) when is_binary(segment) do
     case String.split(segment, ":", parts: 2) do
       [key, value] -> {trimmed_atom(key), trimmed_quote(value)}
       [key] -> {trimmed_atom(key), Macro.var(trimmed_atom(key), nil)}
@@ -48,37 +62,49 @@ defmodule Structo do
       iex> ~m{a, b, c: d}
       %{a: 1, b: 2, c: 3}
 
+
+  ## Structs
+
+  This library can construct standard Elixir structs too:
+
+      iex> import Structo
+      iex> alias Hello.MyStruct
+      iex> a = 1
+      iex> ~m{:MyStruct, a, b: 2}
+      %Hello.MyStruct{a: 1, b: 2}
+
+  This syntax is preferred over the deprecated `use Structo` behaviour,
+  which will be removed in the next release.
   """
   defmacro sigil_m({:<<>>, _meta, [expr]}, []) do
-    quote do
-      %{unquote_splicing(parse(expr))}
+    case parse!(expr) do
+      {mod, fields} when is_list(fields) ->
+        mod = resolve_aliases(mod, __CALLER__.aliases)
+
+        quote do
+          %unquote(mod){unquote_splicing(fields)}
+        end
+
+      fields when is_list(fields) ->
+        quote do
+          %{unquote_splicing(fields)}
+        end
     end
   end
 
-  @doc """
-  While it is a giant hack, this library can semi-work for
-  structs as well. Just `use Structo` in your module:
+  defp resolve_aliases(m, aliases) do
+    case Enum.find(aliases, fn {a, _} -> a == m end) do
+      {_, module} -> module
+      nil -> Module.concat([m])
+    end
+  end
 
-      defmodule MyStruct do
-        use Structo
-        defstruct [:a, :b]
-      end
-
-  And then construct your structs like this:
-
-      iex> import MyStruct
-      iex> a = "wibble"
-      iex> ~MYSTRUCT{a, b: "wobble"}
-      %MyStruct{a: "wibble", b: "wobble"}
-
-  Unfortunately, the module name has to be upcased, due to Elixir's 
-  restrictions on sigil names.
-  """
   defmacro __using__(_opts) do
     mod = inspect(__CALLER__.module)
     sigil = :"sigil_#{String.upcase(mod)}"
 
     quote do
+      @deprecated "Use `sigil_m/2` instead"
       defmacro unquote(sigil)({:<<>>, _, [expr]}, []) do
         quote do
           %unquote(__MODULE__){unquote_splicing(Structo.parse(expr))}
