@@ -27,7 +27,7 @@ defmodule Structo do
 
   @doc false
   def parse_segments([":" <> module | segments]) do
-    {Module.concat([module]), parse_fields(segments)}
+    {module, parse_fields(segments)}
   end
 
   @doc false
@@ -78,6 +78,11 @@ defmodule Structo do
   """
   defmacro sigil_m({:<<>>, _meta, [expr]}, []) do
     case parse!(expr) do
+      {"__MODULE__", fields} when is_list(fields) ->
+        quote do
+          %__MODULE__{unquote_splicing(fields)}
+        end
+
       {mod, fields} when is_list(fields) ->
         mod = resolve_aliases(mod, __CALLER__.aliases)
 
@@ -92,7 +97,9 @@ defmodule Structo do
     end
   end
 
-  defp resolve_aliases(m, aliases) do
+  defp resolve_aliases(mod, aliases) do
+    m = Module.concat([mod])
+
     case Enum.find(aliases, fn {a, _} -> a == m end) do
       {_, module} -> module
       nil -> Module.concat([m])
