@@ -76,6 +76,14 @@ defmodule Structo do
   This syntax is preferred over the deprecated `use Structo` behaviour,
   which will be removed in the next release.
   """
+  defmacro sigil_m({:<<>>, _meta, [expr]}, [?s]) do
+    fields = for {k, v} <- parse!(expr), do: {to_string(k), v}
+
+    quote do
+      %{unquote_splicing(fields)}
+    end
+  end
+
   defmacro sigil_m({:<<>>, _meta, [expr]}, []) do
     case parse!(expr) do
       {"__MODULE__", fields} when is_list(fields) ->
