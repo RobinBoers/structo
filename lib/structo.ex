@@ -62,6 +62,15 @@ defmodule Structo do
       iex> ~m{a, b, c: d}
       %{a: 1, b: 2, c: 3}
 
+  ## String keys
+
+  The optional `s` modifier can be used to construct a map using
+  string keys rather than atom keys:
+
+      iex> import Structo
+      iex> a = 1; b = 2; d = 3
+      iex> ~m{a, b, c: d}s
+      %{"a" => 1, "b" => 2, "c" => 3}
 
   ## Structs
 
