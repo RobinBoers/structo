@@ -119,14 +119,14 @@ defmodule Structo do
   end
 
   defmacro __using__(_opts) do
-    mod = inspect(__CALLER__.module)
+    mod = __CALLER__.module |> Module.split() |> List.last()
     sigil = :"sigil_#{String.upcase(mod)}"
 
     quote do
       @deprecated "Use `sigil_m/2` instead"
       defmacro unquote(sigil)({:<<>>, _, [expr]}, []) do
         quote do
-          %unquote(__MODULE__){unquote_splicing(Structo.parse(expr))}
+          %unquote(__MODULE__){unquote_splicing(Structo.parse!(expr))}
         end
       end
     end

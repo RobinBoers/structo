@@ -176,4 +176,24 @@ defmodule StructoTest do
       assert ~m{nested} == %{nested: %{x: 1}}
     end
   end
+
+  describe "deprecated legacy behaviour" do
+    defmodule LegacyStruct do
+      use Structo
+      defstruct [:name, :value, :data]
+      @compile :nowarn_deprecated_function
+    end
+
+    test "deprecated __using__ macro creates module-specific sigil" do
+      import StructoTest.LegacyStruct
+
+      name = "test"
+      value = 42
+      nested = %{x: 1}
+
+      result = ~LEGACYSTRUCT{name, value, data: nested}
+      
+      assert %LegacyStruct{name: "test", value: 42, data: %{x: 1}} = result
+    end
+  end
 end
