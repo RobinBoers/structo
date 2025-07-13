@@ -101,7 +101,7 @@ defmodule Structo do
         end
 
       {mod, fields} when is_list(fields) ->
-        mod = resolve_aliases(mod, __CALLER__.aliases)
+        mod = resolve_aliases(mod, __CALLER__)
 
         quote do
           %unquote(mod){unquote_splicing(fields)}
@@ -114,13 +114,8 @@ defmodule Structo do
     end
   end
 
-  defp resolve_aliases(mod, aliases) do
-    m = Module.concat([mod])
-
-    case Enum.find(aliases, fn {a, _} -> a == m end) do
-      {_, module} -> module
-      nil -> Module.concat([m])
-    end
+  defp resolve_aliases(mod, caller) do
+    Macro.expand({:__aliases__, [], [String.to_atom(mod)]}, caller)
   end
 
   defmacro __using__(_opts) do
