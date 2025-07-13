@@ -82,8 +82,6 @@ defmodule Structo do
       iex> ~m{:MyStruct, a, b: 2}
       %Hello.MyStruct{a: 1, b: 2}
 
-  This syntax is preferred over the deprecated `use Structo` behaviour,
-  which will be removed in the next release.
   """
   defmacro sigil_m({:<<>>, _meta, [expr]}, [?s]) do
     fields = for {k, v} <- parse!(expr), do: {to_string(k), v}
@@ -116,19 +114,5 @@ defmodule Structo do
 
   defp resolve_aliases(mod, caller) do
     Macro.expand({:__aliases__, [], [String.to_atom(mod)]}, caller)
-  end
-
-  defmacro __using__(_opts) do
-    mod = __CALLER__.module |> Module.split() |> List.last()
-    sigil = :"sigil_#{String.upcase(mod)}"
-
-    quote do
-      @deprecated "Use `sigil_m/2` instead"
-      defmacro unquote(sigil)({:<<>>, _, [expr]}, []) do
-        quote do
-          %unquote(__MODULE__){unquote_splicing(Structo.parse!(expr))}
-        end
-      end
-    end
   end
 end

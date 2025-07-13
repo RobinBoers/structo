@@ -61,7 +61,7 @@ defmodule StructoTest do
     defmodule AnotherTestStruct do
       import Structo
       defstruct [:x, :y]
-      
+
       def create_with_module do
         x = 10
         ~m{:__MODULE__, x, y: 20}
@@ -131,13 +131,13 @@ defmodule StructoTest do
       name = "John"
       age = 30
       result = ~m{:User, name, age, email: "john@example.com"}
-      
+
       assert %User{name: "John", age: 30, email: "john@example.com"} = result
     end
 
     test "pattern matches real structs" do
       user = %User{name: "Jane", age: 25, email: "jane@example.com"}
-      
+
       assert ~m{:User, name, age} = user
       assert name == "Jane"
       assert age == 25
@@ -174,26 +174,6 @@ defmodule StructoTest do
     test "handles maps as values" do
       nested = %{x: 1}
       assert ~m{nested} == %{nested: %{x: 1}}
-    end
-  end
-
-  describe "deprecated legacy behaviour" do
-    defmodule LegacyStruct do
-      use Structo
-      defstruct [:name, :value, :data]
-      @compile :nowarn_deprecated_function
-    end
-
-    test "deprecated __using__ macro creates module-specific sigil" do
-      import StructoTest.LegacyStruct
-
-      name = "test"
-      value = 42
-      nested = %{x: 1}
-
-      result = ~LEGACYSTRUCT{name, value, data: nested}
-      
-      assert %LegacyStruct{name: "test", value: 42, data: %{x: 1}} = result
     end
   end
 end
