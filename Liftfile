@@ -1,0 +1,5 @@
+name: structo
+type: static
+host: nov
+src: doc
+target: docs.dupunkto.org/structo

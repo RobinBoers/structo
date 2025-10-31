@@ -1,0 +1,14 @@
+#!/bin/bash
+
+docs() {
+  mix docs --open
+}
+
+publish() {
+  mix docs
+  lift deploy
+}
+
+release() {
+  mix hex.publish
+}
