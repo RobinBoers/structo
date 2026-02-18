@@ -27,7 +27,7 @@ defmodule Structo do
 
   @doc false
   def parse_segments([":" <> module | segments]) do
-    {module, parse_fields(segments)}
+    {canonized_module(module), parse_fields(segments)}
   end
 
   @doc false
@@ -50,6 +50,7 @@ defmodule Structo do
 
   defp trimmed_atom(s), do: s |> String.trim() |> String.to_atom()
   defp trimmed_quote(v), do: v |> String.trim() |> Code.string_to_quoted!()
+  defp canonized_module(m), do: m |> String.split(".") |> Enum.map(&String.to_atom/1)
 
   @doc """
   This sigil acts as a shorthand for constructing maps with
@@ -93,7 +94,7 @@ defmodule Structo do
 
   defmacro sigil_m({:<<>>, _meta, [expr]}, []) do
     case parse!(expr) do
-      {"__MODULE__", fields} when is_list(fields) ->
+      {[:__MODULE__], fields} when is_list(fields) ->
         quote do
           %__MODULE__{unquote_splicing(fields)}
         end
@@ -113,6 +114,6 @@ defmodule Structo do
   end
 
   defp resolve_aliases(mod, caller) do
-    Macro.expand({:__aliases__, [], [String.to_atom(mod)]}, caller)
+    Macro.expand({:__aliases__, [], mod}, caller)
   end
 end
