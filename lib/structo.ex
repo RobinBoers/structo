@@ -1,22 +1,11 @@
 defmodule Structo do
-  @moduledoc """
-  JavaScript-style object constructors.
-
-  This library allows you to construct maps and structs like this:
-
-      ~m{a, b, c: d}
-
-  Instead of:
-
-      %{a: a, b: b, c: d}
-
-  And it works in matches too:
-
-      iex> ~m{a, b: 2} = %{a: 1, b: 2}
-      iex> a
-      1
-
-  """
+  @readme Path.expand("../README.md", __DIR__)
+  @external_resource @readme
+  @moduledoc @readme
+             |> File.read!()
+             |> String.split("<!-- DOCS HERE -->")
+             |> List.last()
+             |> String.trim()
 
   @doc false
   def parse!(expression) do
