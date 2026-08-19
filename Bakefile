@@ -1,15 +1,3 @@
 #!/bin/bash
 
-setup() {
-  mix deps.get
-  mix deps.compile
-}
-
-publish() {
-  mix docs
-  lift deploy
-}
-
-release() {
-  mix hex.publish
-}
+use elixir
