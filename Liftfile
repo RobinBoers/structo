@@ -1,5 +1,5 @@
 name: docs
 type: static
-host: nov
+host: nov.dupunk.to
 src: doc
 target: docs.dupunkto.org/structo
